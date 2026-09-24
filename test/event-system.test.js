@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { createEvent, createRegistration, listEvents, initializeEventStore } = require('../src/eventService');
+const { createEvent, createRegistration, listEvents, initializeEventStore, createVenue, approveEvent, markAttendance, cancelRegistration, getWaitlistEntries } = require('../src/eventService');
 
 const resetStore = async () => {
   await initializeEventStore(':memory:');
@@ -123,4 +123,83 @@ test('should reject event creation when end time is earlier than start time', as
     }),
     /end time must be later than start time/i,
   );
+});
+
+test('should allow venue conflict detection and approval state changes', async () => {
+  await resetStore();
+
+  const venue = await createVenue({ name: 'Room A', location: 'Main Building' });
+  const first = await createEvent({
+    name: 'Approved Workshop',
+    date: '2026-10-10',
+    startTime: '09:00',
+    endTime: '10:00',
+    capacity: 20,
+    venueId: venue.id,
+    approvalStatus: 'pending',
+  });
+
+  await approveEvent(first.id, 'approved');
+  const updated = await createEvent({
+    name: 'Second room event',
+    date: '2026-10-10',
+    startTime: '10:00',
+    endTime: '11:00',
+    capacity: 10,
+    venueId: venue.id,
+  });
+
+  assert.equal(updated.approvalStatus, 'approved');
+  await assert.rejects(
+    () => createEvent({
+      name: 'Conflict Event',
+      date: '2026-10-10',
+      startTime: '09:30',
+      endTime: '10:30',
+      capacity: 10,
+      venueId: venue.id,
+    }),
+    /venue conflict/i,
+  );
+});
+
+test('should add to waitlist when full and promote on cancellation', async () => {
+  await resetStore();
+
+  const event = await createEvent({
+    name: 'Waitlist Event',
+    date: '2026-10-11',
+    startTime: '11:00',
+    endTime: '12:00',
+    capacity: 1,
+    waitlistEnabled: true,
+  });
+
+  await createRegistration({ eventId: event.id, studentId: 's7' });
+  const waitlisted = await createRegistration({ eventId: event.id, studentId: 's8' });
+  assert.equal(waitlisted.status, 'waitlisted');
+
+  const waitlist = await getWaitlistEntries(event.id);
+  assert.equal(waitlist.length, 1);
+
+  const cancellation = await cancelRegistration({ eventId: event.id, studentId: 's7' });
+  assert.equal(cancellation.promoted.length, 1);
+  assert.equal(cancellation.promoted[0].studentId, 's8');
+});
+
+test('should mark attendance and certificate eligibility', async () => {
+  await resetStore();
+
+  const event = await createEvent({
+    name: 'Attendance Event',
+    date: '2026-10-12',
+    startTime: '14:00',
+    endTime: '15:00',
+    capacity: 2,
+  });
+
+  await createRegistration({ eventId: event.id, studentId: 's9' });
+  const result = await markAttendance(event.id, 's9', 'present');
+  assert.equal(result.attendanceStatus, 'present');
+  assert.equal(result.certificateEligible, true);
 });
