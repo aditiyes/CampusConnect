@@ -1,205 +1,80 @@
-# yallist
+# CampusConnect – Smart Campus Event Management System
 
-Yet Another Linked List
+CampusConnect is a full-stack MERN application for managing campus events. It enables administrators to create and manage events, while students can browse events, register, join waitlists, and manage their personal event schedules.
 
-There are many doubly-linked list implementations like it, but this
-one is mine.
+The key feature of the system is **schedule-clash prevention**. A student cannot register for two events that overlap in date and time. The system also supports event capacity tracking and automatic waitlist promotion when a confirmed student cancels.
 
-For when an array would be too big, and a Map can't be iterated in
-reverse order.
+---
 
-## basic usage
+## Live Features
 
-```js
-import { Yallist } from 'yallist'
-var myList = new Yallist([1, 2, 3])
-myList.push('foo')
-myList.unshift('bar')
-// of course pop() and shift() are there, too
-console.log(myList.toArray()) // ['bar', 1, 2, 3, 'foo']
-myList.forEach(function (k) {
-  // walk the list head to tail
-})
-myList.forEachReverse(function (k, index, list) {
-  // walk the list tail to head
-})
-var myDoubledList = myList.map(function (k) {
-  return k + k
-})
-// now myDoubledList contains ['barbar', 2, 4, 6, 'foofoo']
-// mapReverse is also a thing
-var myDoubledListReverse = myList.mapReverse(function (k) {
-  return k + k
-}) // ['foofoo', 6, 4, 2, 'barbar']
+### Admin Features
 
-var reduced = myList.reduce(function (set, entry) {
-  set += entry
-  return set
-}, 'start')
-console.log(reduced) // 'startfoo123bar'
+- Secure admin login using JWT authentication
+- Create new campus events
+- Edit event information
+- Delete or cancel events
+- View all created events
+- View confirmed, waitlisted, and cancelled registrations
+- View total students, total events, and registration statistics
+- View events that are close to full capacity
+- Monitor remaining seats for every event
+
+### Student Features
+
+- Student registration and login
+- Browse all upcoming campus events
+- Search events by title
+- Filter events by category, venue, and date
+- View full event information
+- Register for an event
+- Join a waitlist if an event is full
+- View personal registered events in **My Events**
+- Cancel a future event registration
+- View registration status:
+  - Confirmed
+  - Waitlisted
+  - Cancelled
+- Receive clear messages when an event is full or clashes with an already registered event
+
+---
+
+## Unique Features
+
+### 1. Live Event Capacity Tracking
+
+Every event has a maximum capacity.
+
+The application calculates available seats using:
+
+```text
+Remaining Seats = Event Capacity - Confirmed Registrations
 ```
 
-## api
+Students can register only while seats are available. When all seats are filled, the system provides a **Join Waitlist** option.
 
-The whole API is considered "public".
+### 2. Schedule Clash Prevention
 
-Functions with the same name as an Array method work more or less the
-same way.
+Before confirming a registration, the system checks whether the student already has another confirmed event during the same time period.
 
-There's reverse versions of most things because that's the point.
+Two events clash when:
 
-### Yallist
+```text
+newEvent.startDateTime < existingEvent.endDateTime
+AND
+newEvent.endDateTime > existingEvent.startDateTime
+```
 
-Default export, the class that holds and manages a list.
+Example:
 
-Call it with either a forEach-able (like an array) or a set of
-arguments, to initialize the list.
+```text
+Existing event:
+React Development Workshop
+10:00 AM to 12:00 PM
 
-The Array-ish methods all act like you'd expect.  No magic length,
-though, so if you change that it won't automatically prune or add
-empty spots.
+New event:
+AI and Machine Learning Seminar
+11:00 AM to 1:00 PM
 
-### Yallist.create(..)
-
-Alias for Yallist function.  Some people like factories.
-
-#### yallist.head
-
-The first node in the list
-
-#### yallist.tail
-
-The last node in the list
-
-#### yallist.length
-
-The number of nodes in the list.  (Change this at your peril.  It is
-not magic like Array length.)
-
-#### yallist.toArray()
-
-Convert the list to an array.
-
-#### yallist.forEach(fn, [thisp])
-
-Call a function on each item in the list.
-
-#### yallist.forEachReverse(fn, [thisp])
-
-Call a function on each item in the list, in reverse order.
-
-#### yallist.get(n)
-
-Get the data at position `n` in the list.  If you use this a lot,
-probably better off just using an Array.
-
-#### yallist.getReverse(n)
-
-Get the data at position `n`, counting from the tail.
-
-#### yallist.map(fn, thisp)
-
-Create a new Yallist with the result of calling the function on each
-item.
-
-#### yallist.mapReverse(fn, thisp)
-
-Same as `map`, but in reverse.
-
-#### yallist.pop()
-
-Get the data from the list tail, and remove the tail from the list.
-
-#### yallist.push(item, ...)
-
-Insert one or more items to the tail of the list.
-
-#### yallist.reduce(fn, initialValue)
-
-Like Array.reduce.
-
-#### yallist.reduceReverse
-
-Like Array.reduce, but in reverse.
-
-#### yallist.reverse
-
-Reverse the list in place.
-
-#### yallist.shift()
-
-Get the data from the list head, and remove the head from the list.
-
-#### yallist.slice([from], [to])
-
-Just like Array.slice, but returns a new Yallist.
-
-#### yallist.sliceReverse([from], [to])
-
-Just like yallist.slice, but the result is returned in reverse.
-
-#### yallist.splice(start, deleteCount, ...)
-
-Like Array.splice.
-
-#### yallist.toArray()
-
-Create an array representation of the list.
-
-#### yallist.toArrayReverse()
-
-Create a reversed array representation of the list.
-
-#### yallist.unshift(item, ...)
-
-Insert one or more items to the head of the list.
-
-#### yallist.unshiftNode(node)
-
-Move a Node object to the front of the list.  (That is, pull it out of
-wherever it lives, and make it the new head.)
-
-If the node belongs to a different list, then that list will remove it
-first.
-
-#### yallist.pushNode(node)
-
-Move a Node object to the end of the list.  (That is, pull it out of
-wherever it lives, and make it the new tail.)
-
-If the node belongs to a list already, then that list will remove it
-first.
-
-#### yallist.removeNode(node)
-
-Remove a node from the list, preserving referential integrity of head
-and tail and other nodes.
-
-Will throw an error if you try to have a list remove a node that
-doesn't belong to it.
-
-### Yallist.Node
-
-The class that holds the data and is actually the list.
-
-Call with `const n = new Node(value, previousNode, nextNode)`
-
-Note that if you do direct operations on Nodes themselves, it's very
-easy to get into weird states where the list is broken.  Be careful :)
-
-#### node.next
-
-The next node in the list.
-
-#### node.prev
-
-The previous node in the list.
-
-#### node.value
-
-The data the node contains.
-
-#### node.list
-
-The list to which this node belongs.  (Null if it does not belong to
-any list.)
+Result:
+Registration rejected because both events overlap between 11:00 AM and
