@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campus Event Manager</title>
+    <style>
+      :root {
+        --bg: #f3f7ff;
+        --panel: #ffffff;
+        --primary: #1d4ed8;
+        --accent: #dbeafe;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --danger: #b91c1c;
+        --success: #166534;
+        --border: #dfe7f5;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      h1, h2 {
+        margin-bottom: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1.3fr 0.7fr;
+        gap: 24px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+      }
+      form {
+        display: grid;
+        gap: 12px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      label {
+        display: grid;
+        gap: 6px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      input, button {
+        font: inherit;
+      }
+      input {
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      button {
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        background: var(--primary);
+        color: white;
+        padding: 10px 16px;
+        font-weight: 600;
+      }
+      button.secondary {
+        background: var(--accent);
+        color: var(--text);
+      }
+      .events {
+        display: grid;
+        gap: 14px;
+        margin-top: 16px;
+      }
+      .event-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        background: #f8fbff;
+      }
+      .event-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+      }
+      .pill {
+        display: inline-block;
+        background: #e0f2fe;
+        color: #0f172a;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .meta {
+        margin: 10px 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .status {
+        margin-top: 8px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .status.full {
+        color: var(--danger);
+      }
+      .status.available {
+        color: var(--success);
+      }
+      .alert {
+        margin-bottom: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #ecfdf5;
+        color: var(--success);
+        border: 1px solid #a7f3d0;
+        display: none;
+      }
+      .alert.error {
+        background: #fef2f2;
+        color: var(--danger);
+        border-color: #fecaca;
+      }
+      .alert.show {
+        display: block;
+      }
+      ul {
+        padding-left: 18px;
+      }
+      @media (max-width: 800px) {
+        .grid { grid-template-columns: 1fr; }
+        .row { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Campus Event Management</h1>
+      <div class="grid">
+        <section class="panel">
+          <h2>Upcoming Events</h2>
+          <div id="message" class="alert"></div>
+          <div id="events" class="events"></div>
+        </section>
+
+        <aside class="panel">
+          <h2>Create Event</h2>
+          <form id="eventForm">
+            <label>
+              Event name
+              <input type="text" name="name" placeholder="Hackathon" required />
+            </label>
+            <label>
+              Date
+              <input type="date" name="date" required />
+            </label>
+            <div class="row">
+              <label>
+                Start time
+                <input type="time" name="startTime" required />
+              </label>
+              <label>
+                End time
+                <input type="time" name="endTime" required />
+              </label>
+            </div>
+            <label>
+              Capacity
+              <input type="number" name="capacity" min="1" required />
+            </label>
+            <button type="submit">Create Event</button>
+          </form>
+
+          <h2 style="margin-top: 24px;">Register</h2>
+          <form id="registrationForm">
+            <label>
+              Student ID
+              <input type="text" name="studentId" placeholder="student-001" required />
+            </label>
+            <label>
+              Event ID
+              <input type="text" name="eventId" placeholder="paste event id here" required />
+            </label>
+            <button type="submit" class="secondary">Register for Event</button>
+          </form>
+
+          <h2 style="margin-top: 24px;">My Schedule</h2>
+          <input id="scheduleStudentId" type="text" placeholder="Student ID" style="margin-bottom: 12px;" />
+          <button id="loadScheduleButton" class="secondary" type="button">Load Schedule</button>
+          <ul id="schedule"></ul>
+        </aside>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
